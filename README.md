@@ -1,6 +1,6 @@
 # Lumi & Quần Đảo Mây Hồng (Pastel 3D Adventure)
 
-> **Dự án được thực hiện trong khuôn khổ sự kiện Codelab tại DevFest 2026 - GDG Miền Trung (Google Developer Groups Miền Trung).**
+> **Dự án được thực hiện trong sự kiện Codelab tại DevFest 2026 - GDG Miền Trung (Google Developer Groups Miền Trung).**
 
 ![DevFest 2026 GDG Miền Trung](https://img.shields.io/badge/Event-DevFest%202026%20GDG%20Mi%E1%BB%81n%20Trung-4285F4?style=for-the-badge&logo=google)
 ![Three.js](https://img.shields.io/badge/Three.js-r149-black?style=for-the-badge&logo=three.js)
