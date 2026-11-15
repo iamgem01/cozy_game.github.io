@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Lumi &amp; Quần Đảo Mây Hồng</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div id="game-root">
+    <!-- 3D WebGL Canvas -->
+    <div id="canvas-wrap">
+      <canvas id="sky-canvas"></canvas>
+    </div>
+
+    <!-- Subtle Dreamy Vignette -->
+    <div id="dream-vignette"></div>
+
+    <!-- TITLE SCREEN OVERLAY -->
+    <section id="title-screen" class="screen-overlay active">
+      <div class="title-card glass-panel">
+        <div class="title-badge">PHIÊU LƯU KHÁM PHÁ 3D</div>
+        <h1 class="game-logo">Lumi &amp; Quần Đảo Mây Hồng</h1>
+        <p class="game-tagline">
+          Dang đôi cánh bướm ánh sao, bay lượn tự do giữa những tầng mây pastel êm đềm,
+          trò chuyện cùng cư dân đảo nổi và đánh thức 4 Cổ Vật Ngân Hà.
+        </p>
+
+        <div class="feature-chips">
+          <span class="chip">Bay lượn tự do</span>
+          <span class="chip">Không áp lực thua cuộc</span>
+          <span class="chip">Nhiệm vụ thư giãn</span>
+        </div>
+
+        <div class="title-actions">
+          <button id="btn-start-game" class="pastel-btn primary-cta">
+            <span>Bắt đầu hành trình</span>
+            <i data-lucide="arrow-right"></i>
+          </button>
+        </div>
+
+        <div class="mini-controls-hint">
+          <span><kbd>WASD</kbd> Di chuyển</span>
+          <span><kbd>Space</kbd> Nhảy · Giữ để lượn</span>
+          <span><kbd>Shift</kbd> Lướt gió</span>
+          <span><kbd>Kéo chuột</kbd> Xoay góc nhìn</span>
+          <span><kbd>E</kbd> Tương tác</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- IN-GAME MINIMALIST HUD -->
+    <header id="hud-top" class="hud-hidden">
+      <div class="hud-left">
+        <div class="stat-pill" title="Tinh Thể Sao đã thu thập">
+          <i data-lucide="sparkles"></i>
+          <span id="hud-stars">0 / 36</span>
+        </div>
+        <div class="stat-pill" title="Cổ Vật Ánh Sao đã đánh thức">
+          <i data-lucide="compass"></i>
+          <span id="hud-relics">0 / 4</span>
+        </div>
+        <div class="stat-pill" title="Sức đập cánh tối đa">
+          <i data-lucide="feather"></i>
+          <span id="hud-feathers-count">2</span>
+        </div>
+        <div class="stat-pill region-pill">
+          <span id="hud-island-name">Đảo Mầm Mơ</span>
+        </div>
+      </div>
+
+      <div class="hud-right">
+        <button id="btn-mood" class="hud-btn" title="Đổi sắc trời (Phím T)">
+          <i data-lucide="sun" id="mood-icon"></i>
+          <span id="mood-label">Ban mai</span>
+        </button>
+        <button id="btn-cam-lock" class="hud-btn" title="Chế độ xoay camera theo chuột (Phím C)">
+          <span id="cam-lock-label">Kéo chuột</span>
+        </button>
+        <button id="btn-map" class="hud-btn" title="Bản đồ quần đảo (Phím M)">
+          <i data-lucide="map"></i>
+          <span>Bản đồ</span>
+        </button>
+        <button id="btn-photo" class="hud-btn icon-only" title="Chế độ ngắm cảnh &amp; chụp ảnh (Phím P)">
+          <i data-lucide="camera"></i>
+        </button>
+        <button id="btn-audio" class="hud-btn icon-only" title="Bật / Tắt âm thanh">
+          <i data-lucide="volume-2" id="audio-icon"></i>
+        </button>
+        <button id="btn-help" class="hud-btn icon-only" title="Hướng dẫn điều khiển (Phím H)">
+          <i data-lucide="help-circle"></i>
+        </button>
+      </div>
+    </header>
+
+    <!-- QUEST JOURNAL TRACKER -->
+    <aside id="quest-panel" class="glass-panel hud-hidden">
+      <div id="quest-header" class="quest-header" title="Thu gọn / Mở rộng (Phím J)">
+        <span>Hành trình</span>
+        <button id="btn-toggle-quest" class="mini-icon-btn" aria-label="Thu gọn">−</button>
+      </div>
+      <div id="quest-body" class="quest-body">
+        <ul id="quest-list" class="quest-list"></ul>
+      </div>
+    </aside>
+
+    <!-- DISCOVERY / MILESTONE TOAST -->
+    <div id="discovery-toast" class="discovery-toast hidden">
+      <div class="toast-sub" id="toast-sub">VÙNG ĐẤT MỚI</div>
+      <div class="toast-title" id="toast-title">Đảo Mầm Mơ</div>
+      <div class="toast-desc" id="toast-desc">Nơi những cơn gió pastel bắt đầu hát ca</div>
+    </div>
+
+    <!-- STAMINA / WING ENERGY BAR -->
+    <div id="feather-hud" class="feather-hud hud-hidden">
+      <div id="buff-badge" class="buff-badge hidden">Bánh Mây: Tốc độ lượn +25%</div>
+      <div id="feather-icons" class="feather-icons"></div>
+      <div class="glide-hint" id="glide-hint">Giữ <kbd>Space</kbd> trên không để bung cánh bướm</div>
+    </div>
+
+    <!-- INTERACTION PROMPT -->
+    <div id="interact-prompt" class="interact-prompt hidden">
+      <span class="key-cap">E</span>
+      <span id="interact-label">Trò chuyện</span>
+    </div>
+
+    <!-- BENCH RESTING BANNER -->
+    <div id="rest-banner" class="rest-banner hidden">
+      <span>Đang ngồi thư giãn ngắm quần đảo mây</span>
+      <span class="rest-sub">Nhấn <kbd>Space</kbd> hoặc <kbd>E</kbd> để đứng dậy</span>
+    </div>
+
+    <!-- NPC DIALOGUE MODAL -->
+    <div id="dialogue-box" class="dialogue-box glass-panel hidden">
+      <div class="dialogue-header">
+        <div id="npc-avatar" class="npc-avatar">CM</div>
+        <div class="npc-meta">
+          <div id="npc-name" class="npc-name">Bác Cú Mơ</div>
+          <div id="npc-role" class="npc-role">Hiền Giả Đảo Mầm Mơ</div>
+        </div>
+      </div>
+      <p id="dialogue-text" class="dialogue-text"></p>
+      <div id="dialogue-choices" class="dialogue-choices"></div>
+    </div>
+
+    <!-- ILLUSTRATED ARCHIPELAGO MAP MODAL (M) -->
+    <div id="map-modal" class="modal-backdrop hidden">
+      <div class="map-card glass-panel">
+        <div class="modal-top">
+          <div>
+            <h2>Bản Đồ Quần Đảo Mây Hồng</h2>
+            <p class="modal-subtitle">Chọn một hòn đảo đã ghé thăm để di chuyển nhanh theo làn gió.</p>
+          </div>
+          <button id="btn-close-map" class="close-pill">Đóng (M)</button>
+        </div>
+        <div class="map-canvas-wrap">
+          <canvas id="map-canvas" width="680" height="400"></canvas>
+        </div>
+        <div id="map-teleport-bar" class="map-teleport-bar"></div>
+      </div>
+    </div>
+
+    <!-- HELP / CONTROLS MODAL (H) -->
+    <div id="help-modal" class="modal-backdrop hidden">
+      <div class="help-card glass-panel">
+        <div class="modal-top">
+          <h2>Hướng Dẫn Điều Khiển</h2>
+          <button id="btn-close-help" class="close-pill">Đóng (H)</button>
+        </div>
+        <div class="help-grid">
+          <div class="help-item">
+            <strong>Di chuyển &amp; Lướt</strong>
+            <p><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd> hoặc phím mũi tên để chạy. Nhấn <kbd>Shift</kbd> để lướt nhanh phía trước.</p>
+          </div>
+          <div class="help-item">
+            <strong>Vỗ cánh &amp; Bay lượn</strong>
+            <p>Nhấn <kbd>Space</kbd> để nhảy hoặc vỗ cánh bay cao. Giữ <kbd>Space</kbd> trên không để bung cánh bướm lượn êm ái.</p>
+          </div>
+          <div class="help-item">
+            <strong>Góc nhìn Camera</strong>
+            <p>Giữ chuột kéo để xoay góc nhìn, con lăn chuột để thu phóng, phím <kbd>Q</kbd> xoay ngang, hoặc nhấn <kbd>C</kbd> bật xoay tự động.</p>
+          </div>
+          <div class="help-item">
+            <strong>Gió nâng &amp; Mây nhún</strong>
+            <p>Bay vào Cột Gió Xoáy để bay vút lên cao và hồi đầy năng lượng cánh. Nhảy lên Mây Hồng để bật nảy.</p>
+          </div>
+          <div class="help-item">
+            <strong>Tương tác &amp; Cổ vật</strong>
+            <p>Nhấn <kbd>E</kbd> để trò chuyện cùng cư dân, đánh thức Cổ Vật mở Cầu Cầu Vồng, gõ Chuông Pha Lê hoặc ngồi ghế nghỉ.</p>
+          </div>
+          <div class="help-item">
+            <strong>Không áp lực thua cuộc</strong>
+            <p>Nếu lỡ rơi xuống tầng mây thấp, Đám Mây Hồng sẽ nhẹ nhàng đưa bạn trở lại hòn đảo gần nhất.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PHOTO / SCENIC MODE OVERLAY (P) -->
+    <div id="photo-overlay" class="photo-overlay hidden">
+      <div class="photo-frame-corners">
+        <span class="corner tl"></span>
+        <span class="corner tr"></span>
+        <span class="corner bl"></span>
+        <span class="corner br"></span>
+      </div>
+      <div class="photo-controls glass-panel">
+        <span>Chế độ ngắm cảnh · Kéo chuột xoay góc · Con lăn thu phóng · <kbd>T</kbd> Đổi sắc trời</span>
+        <button id="btn-capture-shot" class="pastel-btn sm">
+          <i data-lucide="download"></i>
+          <span>Lưu ảnh PNG</span>
+        </button>
+        <button id="btn-exit-photo" class="close-pill">Thoát (P)</button>
+      </div>
+    </div>
+
+    <!-- GRAND SKY CELEBRATION MODAL -->
+    <div id="celebration-modal" class="modal-backdrop hidden">
+      <div class="celebration-card glass-panel">
+        <div class="title-badge">CỰC QUANG NGÂN HÀ ĐÃ THỨC TỈNH</div>
+        <h2>Khúc Ca Bầu Trời Trọn Vẹn</h2>
+        <p id="celebration-summary">
+          Đại Hồng Chung Ngân Hà đã ngân vang khắp Quần Đảo Mây Hồng.
+          Tinh Linh Cá Voi Mây trao tặng Lumi Đôi Cánh Bướm Vĩnh Cửu để tự do sải cánh khắp bầu trời.
+        </p>
+        <div id="celebration-stats" class="feature-chips"></div>
+        <div class="title-actions">
+          <button id="btn-continue-freeplay" class="pastel-btn primary-cta">
+            <span>Tiếp tục bay lượn tự do</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOUCH CONTROLS FOR MOBILE / TABLET -->
+    <div id="touch-controls" class="touch-controls hidden">
+      <div id="joystick-zone" class="joystick-zone">
+        <div id="joystick-knob" class="joystick-knob"></div>
+      </div>
+      <div class="touch-buttons">
+        <button id="touch-interact" class="touch-btn mint">E</button>
+        <button id="touch-dash" class="touch-btn lavender">Lướt</button>
+        <button id="touch-jump" class="touch-btn pink">Bay</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lucide Real Vector Icon Library -->
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"
+          onerror="var s=document.createElement('script');s.src='https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js';document.head.appendChild(s);"></script>
+
+  <!-- Three.js UMD -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"
+          onerror="var s=document.createElement('script');s.src='https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js';document.head.appendChild(s);"></script>
+  <script src="js/audio.js"></script>
+  <script src="js/world.js"></script>
+  <script src="js/entities.js"></script>
+  <script src="js/quests.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
